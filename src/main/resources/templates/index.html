@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/static/css/dataTables.bootstrap.css" rel="stylesheet"/>
+    <link href="/static/css/bk.css" rel="stylesheet">
+    <script src="/static/js/jquery-1.12.4.min.js"></script>
+</head>
+<body class="container" style="background-color: #eeeeee">
+<div id="div_001">
+    <br>
+    <h1>人员信息 <small>列表</small></h1>
+    <br>
+    <div>
+        <a class="btn btn-info" href="/toAdd" role="button" style="float: right;">新增</a>
+
+        <!-- 自动匹配 -->
+        <!--<label for="search_text">
+                <span>搜索：</span>
+                <input type="text" id="search_text" onkeydown="onSearch(this)" value=""/>
+            </label> -->
+
+        <!-- 回车或者鼠标点击才进行匹配 -->
+        <label for="search_text">
+            <input type="text" id="search_text" onkeypress="EnterKey()"/>
+            <button id="submit" onclick="clickSearch()">搜索</button>
+        </label>
+
+        <table style="margin-top: 15px; background-color: #eeeeee" id="table2_demo1" class="table table-bordered table-hover">
+            <THEAD>
+            <tr>
+                <th>ID</th>
+                <th>姓名</th>
+                <th>密码</th>
+                <th>电话</th>
+                <th>操作</th>
+            </tr>
+            </THEAD>
+            <TBODY>
+            <tr th:each="user:${all}">
+                <td th:text="${user.userId}"></td>
+                <td th:text="${user.userName}"></td>
+                <td th:text="${user.password}"></td>
+                <td th:text="${user.phone}"></td>
+                <td th:inline="text">
+                    <a th:id="${user.userId}" href="javascript:void(0)" onclick="editUser(this)">编辑</a>
+                    <span>&nbsp;</span>
+                    <!-- ${'/del?userId='+user.userId}-->
+                    <a th:id="${user.userId}" href="javascript:void(0)" onclick="delUser(this)">删除</a>
+                </td>
+
+            </tr>
+            </TBODY>
+        </table>
+        <span>
+            <span th:inline="text" style="position: relative; top: -1px">共 [[${count}]] 条数据， </span>
+            <span th:inline="text">每页显示</span>
+
+            <label for="select_001">
+                <select id="select_001" class="selector" style="width: 50px" onchange="selectChange()">
+                    <option>5</option>
+                    <option>10</option>
+                    <option>15</option>
+                    <option>20</option>
+                </select>
+            </label>
+           <span> 条</span>
+
+            <!-- 标签外获取后端传值，有以下<td>标签和<p th:inline="text">[[${num}]]</p>两种形式，
+                    使用第二种方式时要注意一定要在父标签中声明th:inline="text" -->
+            <a style="float: right;" href="javascript:void(0)" onclick="pageLast(this)">尾页</a>
+            <a style="float: right; margin-right: 8px" href="javascript:void(0)" onclick="pageNext(this)">下一页</a>
+
+            <a style="float: right; margin-right: 8px" href="javascript:void(0)" onclick="pageNextNumber(this)">
+                <td th:text="${num + 1}" th:if="${num < maxNum}"></td>
+            </a>
+
+            <a style="float: right; margin-right: 8px">
+                <span style="color: red;"><td th:text="${num}"></td></span>
+            </a>
+
+            <a style="float: right; margin-right: 8px" href="javascript:void(0)" onclick="pageProNumber(this)">
+                <td th:text="${num - 1}" th:if="${num > 1}"></td>
+            </a>
+
+            <a style="float: right; margin-right: 8px" href="javascript:void(0)" onclick="pagePrevious(this)">上一页</a>
+            <a style="float: right; margin-right: 8px" href="javascript:void(0)" onclick="pageFirst(this)">首页</a>
+            <span style="float: right; margin-right: 50px"><p th:inline="text">第 [[${num}]] / [[${maxNum}]] 页</p></span>
+        </span>
+    </div>
+</div>
+</body>
+<script src="/static/js/jquery.dataTables.js" type="text/javascript"></script>
+<script src="/static/js/dataTables.bootstrap.js" type="text/javascript"></script>
+<script src="/static/js/select2.js" type="text/javascript"></script>
+<!--js中使用后端传来的数据，js表明th:inline="javascript"，通过多行注释加双中括号的形式获取值-->
+<script type="text/javascript" th:inline="javascript">
+
+    // 删除
+    function delUser(obj) {
+        var id = $(obj).attr("id");
+        var size = $("#select_001").val();
+        var num = /*[[${num}]]*/ 1;
+        $.ajax({
+            url: '/del',
+            data: {'num': num, 'size': size, "userId": id},
+            type: "post",
+            traditional: true,
+            success: function (result) {
+                $("#div_001").empty();
+                $("#div_001").html(result);
+                $("#select_001").val(size);
+            }
+        });
+    }
+
+    // 编辑
+    function editUser(obj) {
+        var id = $(obj).attr("id");
+        var size = $("#select_001").val();
+        var num = /*[[${num}]]*/ 1;
+        $.ajax({
+            url: '/edit',
+            data: {'num': num, 'size': size, "userId": id},
+            type: "post",
+            traditional: true,
+            success: function (result) {
+                $("#div_001").empty();
+                $("#div_001").html(result);
+                $("#select_001").val(size);
+            }
+        });
+    }
+
+    // change事件监控select，当数值变化时改变显示的条数
+    function selectChange() {
+        var size = $("#select_001").val();
+        var num = /*[[${num}]]*/ 1;
+        $.ajax({
+            url: '/list',
+            data: {'num': num, 'size': size},
+            type: "post",
+            traditional: true,
+            success: function (result) {
+                $("#div_001").empty();
+                $("#div_001").html(result);
+                $("#select_001").val(size);
+            }
+        });
+    }
+
+    // 数字上一页
+    function pageProNumber(obj) {
+        // 获取一页显示的数据条数
+        var size = $("#select_001").val();
+        var num = /*[[${num - 1}]]*/ 1;
+        // 已是第一页
+        if (num === 0) {
+            // 将href属性移除，不可点击
+            obj.removeAttribute('href');
+            return;
+        }
+        $.ajax({
+            url: '/list',
+            data: {'num': num, 'size': size},
+            type: "post",
+            traditional: true,
+            success: function (result) {
+                $('#div_001').empty();
+                $('#div_001').html(result);
+            }
+        });
+    }
+
+    // 数字下一页
+    function pageNextNumber(obj) {
+        // 获取一页显示的数据条数
+        var size = $("#select_001").val();
+        var num = /*[[${num + 1}]]*/ 1;
+        var maxNum = /*[[${maxNum}]]*/ 1;
+        // 已是第一页
+        if (num > maxNum) {
+            obj.removeAttribute('href');
+            return;
+        }
+        $.ajax({
+            url: '/list',
+            data: {'num': num, 'size': size},
+            type: "post",
+            traditional: true,
+            success: function (result) {
+                $('#div_001').empty();
+                $('#div_001').html(result);
+            }
+        });
+    }
+
+    // 首页
+    function pageFirst(obj) {
+        // 获取一页显示的数据条数
+        var size = $("#select_001").val();
+        var num = /*[[${num}]]*/ 1;
+        // 已是第一页
+        if (num === 1) {
+            obj.removeAttribute('href');
+            return;
+        }
+        $.ajax({
+            url: '/list',
+            data: {'num': 1, 'size': size},
+            type: "post",
+            traditional: true,
+            success: function (result) {
+                $('#div_001').empty();
+                $('#div_001').html(result);
+            }
+        });
+    }
+
+    // 尾页
+    function pageLast(obj) {
+        // 获取一页显示的数据条数
+        var size = $("#select_001").val();
+        var num = /*[[${num}]]*/ 1;
+        var maxNum = /*[[${maxNum}]]*/ 1;
+        // 已是最后一页
+        if (num === maxNum) {
+            obj.removeAttribute('href');
+            return;
+        }
+        $.ajax({
+            url: '/list',
+            data: {'num': maxNum, 'size': size},
+            type: "post",
+            traditional: true,
+            success: function (result) {
+                $('#div_001').empty();
+                $('#div_001').html(result);
+            }
+        });
+    }
+
+    // 下一页
+    function pageNext(obj) {
+        // 获取一页显示的数据条数
+        var size = $("#select_001").val();
+        // 这里1是默认值的意思，前边取到的值会对它会进行覆盖，默认值不可少，默认值可以是任意类型的任意值
+        var num = /*[[${num + 1}]]*/ 1;
+        var maxNum = /*[[${maxNum}]]*/ 1;
+        // 已是最后一页
+        if (num > maxNum) {
+            obj.removeAttribute('href');
+            return;
+        }
+        $.ajax({
+            url: '/list',
+            data: {'num': num, 'size': size},
+            type: "post",
+            traditional: true,
+            success: function (result) {
+                $('#div_001').empty();
+                $('#div_001').html(result);
+            }
+        });
+    }
+
+    // 前一页
+    function pagePrevious(obj) {
+        // 获取一页显示的数据条数
+        var size = $("#select_001").val();
+        // 获取当前页码
+        var num = /*[[${num - 1}]]*/ 1;
+
+        // 已是第一页
+        if (num === 0) {
+            obj.removeAttribute('href');
+            return;
+        }
+        $.ajax({
+            url: '/list',
+            data: {'num': num, 'size': size},
+            type: "post",
+            traditional: true,
+            success: function (result) {
+                $('#div_001').empty();
+                $('#div_001').html(result);
+            }
+        });
+    }
+
+    // 纯前端的分页、搜索等，数据量大的时候弃用
+    /*$(function () {
+        var language = {
+            search: '搜索：',
+            lengthMenu: "每页显示 _MENU_ 记录",
+            zeroRecords: "没找到相应的数据！",
+            info: "第 _PAGE_ / _PAGES_ 页",
+            infoEmpty: "暂无数据！",
+            infoFiltered: "(从 _MAX_ 条数据中搜索)",
+            paginate: {
+                first: '首页',
+                last: '尾页',
+                previous: '上一页',
+                next: '下一页',
+            }
+        };
+        $('#table2_demo1').dataTable({
+            paging: false, //隐藏分页
+            ordering: false, //关闭排序
+            info: true, //隐藏左下角分页信息
+            searching: false, //关闭搜索
+            pageLength: 5, //每页显示几条数据
+            lengthChange: true, //不允许用户改变表格每页显示的记录数
+            language: language //汉化
+        });
+    });*/
+
+    // 使用姓名进行搜索，监听输入框，有信息输入就直接检索，方便
+    function onSearch(obj) {
+        setTimeout(function () {
+            var storeId = document.getElementById('table2_demo1');
+            // 获取表格行数
+            var rowsLength = storeId.rows.length;
+            // 获取输入框的值
+            var key = obj.value.toLowerCase();
+            // 确定要搜索的列数
+            var searchCol = 1;
+            // 略过表头第0行，从第一行开始匹配
+            for (var i = 1; i < rowsLength; i++) {
+                // 获取当前列的值，忽略大小写
+                var searchText = storeId.rows[i].cells[searchCol].innerHTML.toLowerCase();
+                if (searchText.includes(key)) {
+                    // 匹配到显示
+                    storeId.rows[i].style.display = '';
+                } else {
+                    // 隐藏
+                    storeId.rows[i].style.display = 'none';
+                }
+            }
+        }, 200);//200为延时时间，单位ms
+    }
+
+    // 鼠标点击事件实现分页
+    function clickSearch() {
+        var storeId = document.getElementById('table2_demo1');
+        // 获取表格行数
+        var rowsLength = storeId.rows.length;
+        // 获取输入框的值
+        var key = $("#search_text").val().toLowerCase();
+        // 确定要搜索的列数
+        var searchCol = 1;
+        // 略过表头第0行，从第一行开始匹配
+        for (var i = 1; i < rowsLength; i++) {
+            // 获取当前列的值，忽略大小写
+            var searchText = storeId.rows[i].cells[searchCol].innerHTML.toLowerCase();
+            if (searchText.includes(key)) {
+                // 匹配到显示
+                storeId.rows[i].style.display = '';
+            } else {
+                // 不符合条件隐藏
+                storeId.rows[i].style.display = 'none';
+            }
+        }
+    }
+
+    // 回车键事件实现分页
+    function EnterKey() {
+        /*
+         event.keyCode属性已被弃用，官方文档在这 https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode，
+         里面给了个例子，其实是原来的使用模板，网上一群人都把这个例子当做新的替代方案在那BBBB瞎BB，，，保持微笑^_^
+         官方中给出新的替代方案是event.which，文档 https://api.jquery.com/event.which/ ,要注意的是event.which也已被MDN弃用，
+         文档 https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/which ，但现在大多浏览器依然支持，所以
+         jquery官方文档并未将其标注为弃用
+
+         在上面<input>标签中使用了onkeypress属性，作用是在有键按下时调用一段js代码，可以使用
+         if(event.which === 13){
+             clickSearch();
+         }
+         但是单独使用event的方式被MDN弃用，所以使用下面的方式，要注意的是下面这段代码写在方法外面依旧可以正常运行，
+         而且是最正规的用法，这里写在function里面完全是为了用一下onkeypress属性
+                                                                           ----这段注释写于jquery最新版本为Jquery-3.4.1
+        */
+
+        $("#search_text").keyup(function(event){
+            // if (event.keyCode === 13) {}，这种用法被弃用
+            // if (event.key === "Enter") {} 这种方式也行，即现在可用的有.key === "键"和.which === 数字 两种形式，
+            // 对照表在 https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode 往下翻
+            if(event.which === 13){
+                clickSearch();
+            }
+        });
+    }
+
+    // 这样直接通过监视标签才是正常的用法
+    /*$("#search_text").keyup(function(event){
+        if(event.key === "Enter"){
+            clickSearch();
+        }
+    });*/
+
+
+</script>
+</html>

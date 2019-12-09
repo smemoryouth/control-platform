@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>增加</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+</head>
+<body class="container" style="background-color: #eeeeee">
+    <br>
+    <h1 style="margin-left: 250px; margin-top: 20px">新增  <small>请填写以下信息.</small></h1>
+    <br>
+    <form action="/add" class="form-horizontal" method="post" style="margin-left: 300px">
+        <div class="form-group">
+            <label for="userName" class="col-sm-1 control-label">姓名</label>
+            <div class="col-sm-5">
+                <input class="form-control" type="text" id="userName" name="userName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="password" class="col-sm-1 control-label">密码</label>
+            <div class="col-sm-5">
+                <input class="form-control" type="password" id="password" name="password">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="phone" class="col-sm-1 control-label">电话</label>
+            <div class="col-sm-5">
+                <input class="form-control" type="number" id="phone" name="phone">
+            </div>
+        </div>
+        <div class="form-group" style="margin-left: 130px">
+            <input class="btn btn-info" value="提交" type="submit">
+            &nbsp;&nbsp;&nbsp;
+            <input class="btn btn-info" value="清空" type="reset">
+            &nbsp;&nbsp;&nbsp;
+            <a class="btn btn-success" href="/list">返回</a>
+        </div>
+    </form>
+</body>
+</html>

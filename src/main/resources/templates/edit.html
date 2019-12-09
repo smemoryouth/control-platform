@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>修改</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+</head>
+<body class="container">
+    <br>
+    <h1>修改  <small>请填写以下信息.</small></h1>
+    <br>
+    <form action="/save" method="post"  class="form-horizontal">
+        <fieldset disabled>
+            <div class="form-group has-success has-feedback">
+                <label for="userId" class="col-sm-1 control-label">ID</label>
+                <div class="col-sm-5">
+                    <input type="text" th:value="${user.userId}"  placeholder="Disabled input" class="form-control" id="userId" aria-describedby="inputSuccess2Status">
+                    <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+                    <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                </div>
+            </div>
+        </fieldset>
+        <label>
+            <input type="text" name="userId" th:value="${user.userId}" style="display:none">
+        </label>
+        <label>
+            <input type="text" name="size" th:value="${size}" style="display:none">
+        </label>
+        <label>
+            <input type="text" name="num" th:value="${num}" style="display:none">
+        </label>
+        <div class="form-group">
+            <label for="userName" class="col-sm-1 control-label">姓名</label>
+            <div class="col-sm-5">
+                <input id="userName" class="form-control" type="text" th:value="${user.userName}" name="userName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="password" class="col-sm-1 control-label">密码</label>
+            <div class="col-sm-5">
+                <input type="text" id="password" class="form-control" th:value="${user.password}" name="password">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="phone" class="col-sm-1 control-label">电话</label>
+            <div class="col-sm-5">
+                <input id="phone" class="form-control" type="text" th:value="${user.phone}" name="phone">
+            </div>
+        </div>
+        <div class="form-group" style="margin-left: 200px">
+            <input type="submit" class="btn btn-info" value="确定">
+            <!-- 这里注意：如果前边用$，就像这样，th:href="${'/edit?userId='+user.userId}"，可以直接取出值 -->
+            &nbsp;&nbsp;&nbsp;
+            <a class="btn btn-info" th:href="@{'/edit?num=' + ${num} + '&size=' + ${size} + '&userId='+ ${user.userId}}">重置</a>
+            &nbsp;&nbsp;&nbsp;
+            <a class="btn btn-success" th:href="@{'/list?num=' + ${num} + '&size=' + ${size}}">返回</a>
+        </div>
+    </form>
+</body>
+</html>
